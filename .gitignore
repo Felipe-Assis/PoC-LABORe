@@ -1,2 +1,18 @@
 **/node_modules
 **/package-lock.json
+
+# IntelliJ IDEA-specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ESLint, Prettier cache
+*/.eslintcache
+
+# Environment variables
+*/.env
+
+# Build and distribution directories
+*/build/
+*/dist/
