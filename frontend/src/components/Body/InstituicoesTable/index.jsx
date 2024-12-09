@@ -2,16 +2,10 @@ import React from 'react';
 import { useTable, useSortBy  } from 'react-table';
 import './index.css';
 import {Button} from "react-bootstrap";
+import {useInstitutionStore} from "../../../store/instituicoesStore.js";
 
 const InstituicoesTable = () => {
-    const data = React.useMemo(
-        () => [
-            { nome: 'Instituição A', uf: 'SP', qtdAlunos: 1200 },
-            { nome: 'Instituição B', uf: 'RJ', qtdAlunos: 800 },
-            { nome: 'Instituição C', uf: 'MG', qtdAlunos: 950 },
-        ],
-        []
-    );
+    const { institutions, removeInstitution } = useInstitutionStore();
 
     const columns = React.useMemo(
         () => [
@@ -19,7 +13,7 @@ const InstituicoesTable = () => {
             { Header: 'UF', accessor: 'uf' },
             { Header: 'Qtd Alunos', accessor: 'qtdAlunos' },
             {
-                Header: 'Edit',
+                Header: '',
                 id: 'edit',
                 Cell: ({ row }) => (
                     <Button
@@ -27,13 +21,13 @@ const InstituicoesTable = () => {
                         className="btn-warning"
                         onClick={() => handleEdit(row)}
                     >
-                        <i className="bi bi-pencil me-2"></i>Edit
+                        <i className="bi bi-pencil me-2"></i>Editar
                     </Button>
                 ),
                 disableSortBy: true
             },
             {
-                Header: 'Delete',
+                Header: '',
                 id: 'delete',
                 Cell: ({ row }) => (
                     <Button
@@ -41,7 +35,7 @@ const InstituicoesTable = () => {
                         className="btn-danger"
                         onClick={() => handleDelete(row)}
                     >
-                        <i className="bi bi-trash me-2"></i>Delete
+                        <i className="bi bi-trash me-2"></i>Deletar
                     </Button>
                 ),
                 disableSortBy: true
@@ -58,13 +52,18 @@ const InstituicoesTable = () => {
 
     }
 
+
+
+
+
+
     const {
         getTableProps,
         getTableBodyProps,
         headerGroups,
         rows,
         prepareRow,
-    } = useTable({ columns, data }, useSortBy);
+    } = useTable({ columns, data: institutions }, useSortBy);
 
     return (
         <div className="table-container">

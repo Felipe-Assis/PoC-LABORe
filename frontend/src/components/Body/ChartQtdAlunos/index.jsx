@@ -1,16 +1,129 @@
+import React, { useLayoutEffect, useRef } from 'react';
+import {useInstitutionStore} from "../../../store/instituicoesStore.js";
+import * as am5 from '@amcharts/amcharts5';
+import * as am5xy from '@amcharts/amcharts5/xy';
+import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import './index.css';
 
 const ChartQtdAlunos = () => {
+    const chartRef = useRef(null);
+    const { institutions } = useInstitutionStore();
+
+    useLayoutEffect(() => {
+        if (!chartRef.current) return;
+
+        // Create root element
+        const root = am5.Root.new(chartRef.current);
+
+        // Set theme
+        root.setThemes([am5themes_Animated.new(root)]);
+
+        // Create chart
+        const chart = root.container.children.push(
+            am5xy.XYChart.new(root, {
+                panX: true,
+                panY: true,
+                wheelX: "panX",
+                wheelY: "zoomX",
+                pinchZoomX: true,
+                paddingLeft: 0,
+                paddingRight: 1,
+            })
+        );
+
+        // Add cursor
+        const cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+        cursor.lineY.set("visible", false);
+
+        // Create X-axis
+        const xRenderer = am5xy.AxisRendererX.new(root, {
+            minGridDistance: 30,
+            minorGridEnabled: true,
+        });
+
+        xRenderer.labels.template.setAll({
+            rotation: -90,
+            centerY: am5.p50,
+            centerX: am5.p100,
+            paddingRight: 15,
+        });
+
+        xRenderer.grid.template.setAll({
+            location: 1,
+        });
+
+        const xAxis = chart.xAxes.push(
+            am5xy.CategoryAxis.new(root, {
+                maxDeviation: 0.3,
+                categoryField: "nome",
+                renderer: xRenderer,
+                tooltip: am5.Tooltip.new(root, {}),
+            })
+        );
+
+        // Create Y-axis
+        const yRenderer = am5xy.AxisRendererY.new(root, {
+            strokeOpacity: 0.1,
+        });
+
+        const yAxis = chart.yAxes.push(
+            am5xy.ValueAxis.new(root, {
+                maxDeviation: 0.3,
+                renderer: yRenderer,
+            })
+        );
+
+        // Create series
+        const series = chart.series.push(
+            am5xy.ColumnSeries.new(root, {
+                name: "Qtd Alunos",
+                xAxis: xAxis,
+                yAxis: yAxis,
+                valueYField: "qtdAlunos",
+                sequencedInterpolation: true,
+                categoryXField: "nome",
+                tooltip: am5.Tooltip.new(root, {
+                    labelText: "{valueY}",
+                }),
+            })
+        );
+
+        // Style series columns
+        series.columns.template.setAll({
+            cornerRadiusTL: 5,
+            cornerRadiusTR: 5,
+            strokeOpacity: 0,
+        });
+
+        // Add color adapters for dynamic coloring
+        series.columns.template.adapters.add("fill", (fill, target) => {
+            return chart.get("colors").getIndex(series.columns.indexOf(target));
+        });
+
+        series.columns.template.adapters.add("stroke", (stroke, target) => {
+            return chart.get("colors").getIndex(series.columns.indexOf(target));
+        });
+
+        // Set data
+        series.data.setAll(institutions);
+        xAxis.data.setAll(institutions);
+
+        // Animate on load
+        series.appear(1000);
+        chart.appear(1000, 100);
+
+        // Cleanup
+        return () => root.dispose();
+    }, [institutions]);
+
     return (
         <div className='chart-container'>
             <h1>Gráfico de quantidade de alunos</h1>
             <div className='chart-element'>
-                <div className='chart'>Implemente o seguinte gráfico: <a href='https://www.amcharts.com/demos/column-with-rotated-series/'>https://www.amcharts.com/demos/column-with-rotated-series/</a></div>
-                <div className='chart'>O gráfico deve ser implementado dentro dessa div, chart-element, removendo o conteúdo atual dela</div>
-                <div className='chart'>Observe que o amcharts não está instalado no projeto. Você deve instalá-lo e configurá-lo</div>
+                <div ref={chartRef} style={{ width: '100%', height: '400px' }}></div>
             </div>
         </div>
     );
-}
+};
 
 export default ChartQtdAlunos;
