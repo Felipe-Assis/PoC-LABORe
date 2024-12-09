@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTable } from 'react-table';
 import './index.css';
+import {Button} from "react-bootstrap";
 
 const InstituicoesTable = () => {
     const data = React.useMemo(
@@ -17,9 +18,43 @@ const InstituicoesTable = () => {
             { Header: 'Nome', accessor: 'nome' },
             { Header: 'UF', accessor: 'uf' },
             { Header: 'Qtd Alunos', accessor: 'qtdAlunos' },
+            {
+                Header: 'Edit',
+                id: 'edit',
+                Cell: ({ row }) => (
+                    <Button
+                        variant="outlined"
+                        className="btn-warning"
+                        onClick={() => handleEdit(row)}
+                    >
+                        <i className="bi bi-pencil me-2"></i>Edit
+                    </Button>
+                ),
+            },
+            {
+                Header: 'Delete',
+                id: 'delete',
+                Cell: ({ row }) => (
+                    <Button
+                        variant="contained"
+                        className="btn-danger"
+                        onClick={() => handleDelete(row)}
+                    >
+                        <i className="bi bi-trash me-2"></i>Delete
+                    </Button>
+                ),
+            },
         ],
         []
     );
+
+    const handleEdit = (rowData) => {
+
+    }
+
+    const handleDelete = (rowData) => {
+
+    }
 
     const {
         getTableProps,

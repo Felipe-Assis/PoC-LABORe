@@ -1,11 +1,15 @@
+// Importa dotenv para carregar variáveis de ambiente
+require('dotenv').config();
+
 const mongoose = require('mongoose')
 
-const mongoURL = 'url_do_servidor_mongo'
-const mongoPort = 'porta_do_servidor_mongo'
+const mongoURL = process.env.MONGO_URL;
+const mongoPort = process.env.MONGO_PORT;
 
-const username = encodeURIComponent('seu_usuario')
-const password = encodeURIComponent('sua_senha')
-const databaseName = encodeURIComponent('seu_database')
+const username = encodeURIComponent(process.env.MONGO_USERNAME);
+const password = encodeURIComponent(process.env.MONGO_PASSWORD);
+const databaseName = encodeURIComponent(process.env.MONGO_DATABASE);
+
 const authDB = databaseName
 
 const connectionURL = `mongodb://${username}:${password}@${mongoURL}:${mongoPort}/${databaseName}?authMechanism=SCRAM-SHA-1&authSource=${authDB}`
