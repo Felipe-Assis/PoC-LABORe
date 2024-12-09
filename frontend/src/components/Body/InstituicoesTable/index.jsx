@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTable } from 'react-table';
+import { useTable, useSortBy  } from 'react-table';
 import './index.css';
 import {Button} from "react-bootstrap";
 
@@ -30,6 +30,7 @@ const InstituicoesTable = () => {
                         <i className="bi bi-pencil me-2"></i>Edit
                     </Button>
                 ),
+                disableSortBy: true
             },
             {
                 Header: 'Delete',
@@ -43,6 +44,7 @@ const InstituicoesTable = () => {
                         <i className="bi bi-trash me-2"></i>Delete
                     </Button>
                 ),
+                disableSortBy: true
             },
         ],
         []
@@ -62,7 +64,7 @@ const InstituicoesTable = () => {
         headerGroups,
         rows,
         prepareRow,
-    } = useTable({ columns, data });
+    } = useTable({ columns, data }, useSortBy);
 
     return (
         <div className="table-container">
@@ -71,8 +73,21 @@ const InstituicoesTable = () => {
                     {headerGroups.map(headerGroup => (
                         <tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
                             {headerGroup.headers.map(column => (
-                                <th {...column.getHeaderProps()} key={column.id}>
+                                <th {...column.getHeaderProps(column.getSortByToggleProps())}
+                                    key={column.id}
+                                    style={{cursor: column.canSort ? 'pointer' : 'default'}}
+                                >
                                     {column.render('Header')}
+
+                                    {column.isSorted ? (
+                                        column.isSortedDesc ? (
+                                            <i className="bi bi-caret-down-fill"></i>
+                                        ) : (
+                                            <i className="bi bi-caret-up-fill"></i>
+                                        )
+                                    ) : (
+                                        column.disableSortBy ? '' : <i className="bi bi-chevron-expand"></i>
+                                    )}
                                 </th>
                             ))}
                         </tr>

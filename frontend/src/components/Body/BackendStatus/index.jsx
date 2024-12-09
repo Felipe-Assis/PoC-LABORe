@@ -5,6 +5,7 @@ import backendUrl from '../../../utils/backend-url';
 
 const BackendStatus = () => {
     const [status, setStatus] = useState(null);
+    const [showAlert, setShowAlert] = useState(true);
 
     const checkBackendStatus = async () => {
         try {
@@ -27,12 +28,16 @@ const BackendStatus = () => {
     return (
         <div>
             {status === 'success' && (
-                <Alert variant="success">
+                <Alert variant="success"
+                       dismissible
+                       onClose={() => setShowAlert(false)}>
                     API do Backend está acessível.
                 </Alert>
             )}
             {status === 'error' && (
-                <Alert variant="danger">
+                <Alert variant="danger"
+                       dismissible
+                       onClose={() => setShowAlert(false)}>
                     API do Backend está inacessível,{''}
                     <Button variant="link" onClick={checkBackendStatus}>
                         clique aqui para tentar novamente
