@@ -6,7 +6,7 @@ const InstituicaoSchema = new mongoose.Schema({
         required: [true, 'O campo "nome" é obrigatório.'],
         unique: [true, 'Já existe uma instituição com este nome.'],
         trim: true,
-        minlength: [3, 'O nome deve ter no mínimo 3 caracteres.'],
+        minlength: [1, 'O nome deve ter no mínimo 1 caracter.'],
         maxlength: [100, 'O nome deve ter no máximo 100 caracteres.']
     },
     uf: {

@@ -26,7 +26,7 @@ const BackendStatus = () => {
     }, []);
 
     return (
-        <div>
+        <div className="backend-status">
             {status === 'success' && (
                 <Alert variant="success"
                        dismissible

@@ -13,7 +13,7 @@ const DeleteModal = ({ rowData, show, handleClose }) => {
 
     return (
         <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
+            <Modal.Header className="bg-danger" closeButton>
                 <Modal.Title>Deletar Instituição</Modal.Title>
             </Modal.Header>
             <Modal.Body>Tem certeza que deseja deletar {rowData.nome}?</Modal.Body>

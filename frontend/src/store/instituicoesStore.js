@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { useToastStore } from './toastStore';
-const baseUrl = "http://localhost:1713/";
+import backendUrl from "../utils/backend-url.js";
+import apiRequest from "../utils/api-request.js";
 
 export const useInstitutionStore = create((set) => {
     const addToast = useToastStore.getState().addToast;
@@ -8,106 +9,120 @@ export const useInstitutionStore = create((set) => {
     return {
         institutions: [],
         studentCountsByUF: [],
+        selectedIds: [],
+        setSelectedIds: (ids) => set({ selectedIds: ids }), // Action to update selected rows
+        clearSelectedIds: () => set({ selectedIds: [] }), // Action to clear selection
         fetchInstitutions: async () => {
             try {
-                const response = await fetch(`${baseUrl}instituicoes`);
-                const data = await response.json();
+                const data = await apiRequest(`${backendUrl}/instituicoes`, {}, null);
                 set({ institutions: data });
-            } catch (error) {
-                console.error('Error fetching institutions:', error);
+            } catch {
+                console.error('Error fetching institutions');
             }
         },
-        fetchStudentCountsByUF: async () => { // Function to fetch aggregated data
+        fetchStudentCountsByUF: async () => {
             try {
-                const response = await fetch(`${baseUrl}instituicoes/qtd-alunos-por-uf`);
-                const data = await response.json();
+                const data = await apiRequest(`${backendUrl}/instituicoes/qtd-alunos-por-uf`, {}, null);
                 set({ studentCountsByUF: data });
-            } catch (error) {
-                console.error('Error fetching student counts by UF:', error);
+            } catch {
+                console.error('Error fetching student counts by UF');
             }
         },
         addInstitution: async (institution) => {
             try {
-                const response = await fetch(`${baseUrl}instituicoes`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(institution),
-                });
-                const newInstitution = await response.json();
-                set((state) => ({
-                    institutions: [...state.institutions, newInstitution],
-                }));
-                addToast('Instituição adicionada com sucesso!', 'success');
-            } catch (error) {
-                console.error('Error adding institution:', error);
+                const newInstitution = await apiRequest(
+                    `${backendUrl}/instituicoes`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(institution),
+                    },
+                    addToast
+                );
+
+                if (newInstitution.details) {
+                    addToast(newInstitution.details, 'danger');
+                } else {
+                    set((state) => ({
+                        institutions: [...state.institutions, newInstitution],
+                    }));
+                    addToast('Instituição adicionada com sucesso!', 'success');
+                }
+            } catch {
                 addToast('Erro ao adicionar instituição.', 'danger');
             }
         },
         editInstitution: async (id, updatedData) => {
             try {
-                const response = await fetch(`${baseUrl}instituicoes/${id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updatedData),
-                });
-                const updatedInstitution = await response.json();
+                const updatedInstitution = await apiRequest(
+                    `${backendUrl}/instituicoes/${id}`,
+                    {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatedData),
+                    },
+                    addToast
+                );
+
                 set((state) => ({
                     institutions: state.institutions.map((inst) =>
                         inst._id === id ? updatedInstitution : inst
                     ),
                 }));
                 addToast('Instituição editada com sucesso!', 'success');
-            } catch (error) {
-                console.error('Error editing institution:', error);
+            } catch {
                 addToast('Erro ao editar instituição.', 'danger');
             }
         },
         deleteInstitution: async (id) => {
-            console.log("delete", id);
             try {
-                await fetch(`${baseUrl}instituicoes/${id}`, {
-                    method: 'DELETE',
-                });
+                await apiRequest(
+                    `${backendUrl}/instituicoes/${id}`,
+                    { method: 'DELETE' },
+                    addToast
+                );
+
                 set((state) => ({
                     institutions: state.institutions.filter((inst) => inst._id !== id),
                 }));
                 addToast('Instituição deletada com sucesso!', 'success');
-            } catch (error) {
-                console.error('Error deleting institution:', error);
+            } catch {
                 addToast('Erro ao deletar instituição.', 'danger');
             }
         },
-        bulkDeleteInstitutions: async (ids) => {
+        bulkDeleteInstitutions: async () => {
+            const ids = useInstitutionStore.getState().selectedIds;
+            console.log(`deleteInstitutions`, ids)
+
             if (!Array.isArray(ids) || ids.length === 0) {
                 addToast('Nenhuma instituição selecionada para deletar.', 'warning');
                 return;
             }
 
             try {
-                const response = await fetch(`${baseUrl}instituicoes/bulk-delete`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids }),
-                });
-                const result = await response.json();
+                const result = await apiRequest(
+                    `${backendUrl}/instituicoes/bulk-delete`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids }),
+                    },
+                    addToast
+                );
 
-                if (response.ok) {
-                    set((state) => ({
-                        institutions: state.institutions.filter(
-                            (inst) => !ids.includes(inst._id)
-                        ),
-                    }));
-                    addToast(
-                        `Instituições deletadas com sucesso! (${result.deletedCount})`,
-                        'success'
-                    );
-                } else {
-                    addToast(result.error || 'Erro ao deletar instituições.', 'danger');
-                }
-            } catch (error) {
-                console.error('Error deleting institutions:', error);
+                set((state) => ({
+                    institutions: state.institutions.filter(
+                        (inst) => !ids.includes(inst._id)
+                    ),
+                    selectedIds: [], // Clear selection after deletion
+                }));
+                addToast(
+                    `Instituições deletadas com sucesso! (${result.deletedCount})`,
+                    'success'
+                );
+            } catch {
                 addToast('Erro ao deletar instituições.', 'danger');
             }
         },
-    }
+    };
 });

@@ -120,7 +120,7 @@ router.delete('/:id', async (req, res) => {
 
 
 // Bulk delete endpoint
-router.delete('/bulk-delete', async (req, res) => {
+router.post('/bulk-delete', async (req, res) => {
     const { ids } = req.body; // Expecting an array of IDs in the request body
 
     if (!Array.isArray(ids) || ids.length === 0) {
