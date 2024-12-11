@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from 'react';
+import React, {useEffect, useLayoutEffect, useRef} from 'react';
 import {useInstitutionStore} from "../../../store/instituicoesStore.js";
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
@@ -7,10 +7,14 @@ import './index.css';
 
 const ChartQtdAlunos = () => {
     const chartRef = useRef(null);
-    const { institutions } = useInstitutionStore();
+    const { institutions, fetchInstitutions, fetchStudentCountsByUF, studentCountsByUF } = useInstitutionStore();
+
+    useEffect(() => {
+        fetchStudentCountsByUF();
+    }, [fetchStudentCountsByUF, institutions]);
 
     useLayoutEffect(() => {
-        if (!chartRef.current) return;
+        if (!chartRef.current || studentCountsByUF.length === 0) return;
 
         // Create root element
         const root = am5.Root.new(chartRef.current);
@@ -55,7 +59,7 @@ const ChartQtdAlunos = () => {
         const xAxis = chart.xAxes.push(
             am5xy.CategoryAxis.new(root, {
                 maxDeviation: 0.3,
-                categoryField: "nome",
+                categoryField: "uf",
                 renderer: xRenderer,
                 tooltip: am5.Tooltip.new(root, {}),
             })
@@ -79,9 +83,9 @@ const ChartQtdAlunos = () => {
                 name: "Qtd Alunos",
                 xAxis: xAxis,
                 yAxis: yAxis,
-                valueYField: "qtdAlunos",
+                valueYField: "totalAlunos",
                 sequencedInterpolation: true,
-                categoryXField: "nome",
+                categoryXField: "uf",
                 tooltip: am5.Tooltip.new(root, {
                     labelText: "{valueY}",
                 }),
@@ -105,8 +109,8 @@ const ChartQtdAlunos = () => {
         });
 
         // Set data
-        series.data.setAll(institutions);
-        xAxis.data.setAll(institutions);
+        series.data.setAll(studentCountsByUF);
+        xAxis.data.setAll(studentCountsByUF);
 
         // Animate on load
         series.appear(1000);
@@ -114,7 +118,8 @@ const ChartQtdAlunos = () => {
 
         // Cleanup
         return () => root.dispose();
-    }, [institutions]);
+    }, [studentCountsByUF]);
+
 
     return (
         <div className='chart-container'>

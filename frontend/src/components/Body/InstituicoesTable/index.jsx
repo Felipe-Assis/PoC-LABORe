@@ -1,11 +1,20 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { useTable, useSortBy  } from 'react-table';
 import './index.css';
 import {Button} from "react-bootstrap";
 import {useInstitutionStore} from "../../../store/instituicoesStore.js";
+import EditModal from "./EditModal/index.jsx";
+import DeleteModal from "./DeleteModal/index.jsx"
 
 const InstituicoesTable = () => {
-    const { institutions, removeInstitution } = useInstitutionStore();
+    const { institutions, fetchInstitutions, deleteInstitution } = useInstitutionStore();
+    const [editData, setEditData] = useState(null);
+    const [deleteData, setDeleteData] = useState(null);
+
+
+    useEffect(() => {
+        fetchInstitutions();
+    }, [fetchInstitutions]);
 
     const columns = React.useMemo(
         () => [
@@ -19,7 +28,7 @@ const InstituicoesTable = () => {
                     <Button
                         variant="outlined"
                         className="btn-warning"
-                        onClick={() => handleEdit(row)}
+                        onClick={() => handleEdit(row.original)}
                     >
                         <i className="bi bi-pencil me-2"></i>Editar
                     </Button>
@@ -33,7 +42,7 @@ const InstituicoesTable = () => {
                     <Button
                         variant="contained"
                         className="btn-danger"
-                        onClick={() => handleDelete(row)}
+                        onClick={() => handleDelete(row.original)}
                     >
                         <i className="bi bi-trash me-2"></i>Deletar
                     </Button>
@@ -44,17 +53,13 @@ const InstituicoesTable = () => {
         []
     );
 
-    const handleEdit = (rowData) => {
+    const handleEdit = (data) => setEditData(data);
+    const handleDelete = (data) => setDeleteData(data);
 
-    }
-
-    const handleDelete = (rowData) => {
-
-    }
-
-
-
-
+    const confirmDelete = async () => {
+        await deleteInstitution(deleteData._id);
+        setDeleteData(null);
+    };
 
 
     const {
@@ -107,6 +112,21 @@ const InstituicoesTable = () => {
                     })}
                 </tbody>
             </table>
+            {editData && (
+                <EditModal
+                    rowData={editData}
+                    show={!!editData}
+                    handleClose={() => setEditData(null)}
+                />
+            )}
+            {deleteData && (
+                <DeleteModal
+                    rowData={deleteData}
+                    show={!!deleteData}
+                    handleClose={() => setDeleteData(null)}
+                    onConfirm={confirmDelete}
+                />
+            )}
         </div>
     );
 };
