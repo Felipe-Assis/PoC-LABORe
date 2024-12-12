@@ -30,10 +30,15 @@ const InstituicoesTable = ({filterValue}) => {
 
 
     const filteredInstitutions = React.useMemo(() => {
-        return institutions.filter((inst) =>
-            inst?.nome?.toLowerCase()?.includes((filterValue || '').toLowerCase())
+        const lowerCaseFilter = (filterValue || '').toLowerCase();
+        const regex = new RegExp(lowerCaseFilter, 'i');
+        return institutions.filter(
+            (inst) =>
+                regex.test(inst?.nome || '') ||
+                regex.test(inst?.uf || '') ||
+                (!isNaN(inst?.qtdAlunos) && regex.test(inst?.qtdAlunos.toString()))
         );
-    }, [institutions, filterValue]); // Dependencies: only recompute if institutions or filterValue changes
+    }, [institutions, filterValue]);
 
 
     const columns = React.useMemo(
