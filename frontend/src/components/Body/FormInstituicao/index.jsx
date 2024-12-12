@@ -2,6 +2,7 @@ import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import ufs from '../../../utils/ufs';
+import './index.css';
 
 // Validation Schema
 const validationSchema = Yup.object({
@@ -9,9 +10,9 @@ const validationSchema = Yup.object({
         .trim()
         .min(1, 'O nome deve ter no mínimo 1 caracter.')
         .max(100, 'O nome deve ter no máximo 100 caracteres.')
-        .required('O campo "nome" é obrigatório.'),
+        .required('O campo "Nome" é obrigatório.'),
     uf: Yup.string()
-        .required('O campo "uf" é obrigatório.')
+        .required('O campo "UF" é obrigatório.')
         .oneOf(
             ufs.map((u) => u.sigla),
             'Selecione uma UF válida.'
@@ -19,7 +20,7 @@ const validationSchema = Yup.object({
     qtdAlunos: Yup.number()
         .typeError('A quantidade de alunos deve ser um número.')
         .min(0, 'A quantidade de alunos deve ser maior ou igual a 0.')
-        .required('O campo "quantidade de alunos" é obrigatório.'),
+        .required('O campo "Quantidade de alunos" é obrigatório.'),
 });
 
 const FormInstituicao = ({ initialData, onChange, innerRef }) => {
@@ -40,15 +41,15 @@ const FormInstituicao = ({ initialData, onChange, innerRef }) => {
             validateOnBlur={true}
             innerRef={innerRef} // Attach Formik instance to innerRef
         >
-            {() => (
+            {({errors, touched}) => (
                 <Form>
-                    <div className="form-group">
+                    <div className={`form-group ${errors.nome && touched.nome ? 'is-invalid' : ''}`}>
                         <label htmlFor="nome">Nome</label>
                         <Field
                             type="text"
                             id="nome"
                             name="nome"
-                            className="form-control"
+                            className={`form-control form-group ${errors.nome && touched.nome ? 'is-invalid' : ''}`}
                         />
                         <ErrorMessage
                             name="nome"
@@ -57,13 +58,13 @@ const FormInstituicao = ({ initialData, onChange, innerRef }) => {
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className={`form-group ${errors.uf && touched.uf ? 'is-invalid' : ''}`}>
                         <label htmlFor="uf">UF</label>
                         <Field
                             as="select"
                             id="uf"
                             name="uf"
-                            className="form-control"
+                            className={`form-control form-group ${errors.uf && touched.uf ? 'is-invalid' : ''}`}
                         >
                             <option value="">Selecione a UF</option>
                             {ufs.map((uf) => (
@@ -79,13 +80,13 @@ const FormInstituicao = ({ initialData, onChange, innerRef }) => {
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className={`form-group ${errors.qtdAlunos && touched.qtdAlunos ? 'is-invalid' : ''}`}>
                         <label htmlFor="qtdAlunos">Quantidade de Alunos</label>
                         <Field
                             type="number"
                             id="qtdAlunos"
                             name="qtdAlunos"
-                            className="form-control"
+                            className={`form-control form-control form-group ${errors.qtdAlunos && touched.qtdAlunos ? 'is-invalid' : ''}`}
                         />
                         <ErrorMessage
                             name="qtdAlunos"

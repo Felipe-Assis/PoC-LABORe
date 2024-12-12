@@ -4,9 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import FormInstituicao from '../FormInstituicao';
 import { useInstitutionStore } from '../../../store/instituicoesStore';
+import './index.css';
 
 const AddButton = () => {
     const [show, setShow] = useState(false);
+    const [shake, setShake] = useState(false); // For modal shaking effect
     const addInstitution = useInstitutionStore((state) => state.addInstitution);
     const [formData, setFormData] = useState({});
     const formikRef = useRef(); // Reference to Formik instance
@@ -14,9 +16,20 @@ const AddButton = () => {
     const handleClose = () => setShow(false);
     const handleSave = async () => {
         if (formikRef.current) {
-            const isValid = await formikRef.current.validateForm(); // Validate the form
-            if (Object.keys(isValid).length === 0) { // Check if there are no validation errors
-                const formData = formikRef.current.values; // Access the current form values
+            const errors = await formikRef.current.validateForm();
+            formikRef.current.setTouched(
+                Object.keys(formikRef.current.initialValues).reduce(
+                    (acc, key) => ({ ...acc, [key]: true }),
+                    {}
+                ),
+                true
+            );
+
+            if (Object.keys(errors).length > 0) {
+                setShake(true); // Trigger shake effect
+                setTimeout(() => setShake(false), 500); // Remove shake effect after animation
+            } else {
+                const formData = formikRef.current.values;
                 await addInstitution(formData);
                 handleClose();
             }
@@ -29,7 +42,10 @@ const AddButton = () => {
                 <FontAwesomeIcon icon={faPlus} /> Nova Instituição
             </Button>
 
-            <Modal show={show} onHide={handleClose}>
+            <Modal show={show}
+                   onHide={handleClose}
+                   className={shake ? 'shake-modal' : ''} // Add shake class conditionally
+            >
                 <Modal.Header className="bg-success" closeButton>
                     <Modal.Title>Nova Instituição</Modal.Title>
                 </Modal.Header>
